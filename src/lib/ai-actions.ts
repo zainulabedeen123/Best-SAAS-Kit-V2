@@ -4,6 +4,7 @@ import { currentUser } from '@clerk/nextjs/server';
 import { db, AiConversations, AiMessages, AiUsage } from '@/db';
 import { eq, desc, and, gte, sql } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 import AIService from './ai-service';
 import { logUserActivity } from './actions';
 
@@ -174,23 +175,6 @@ export async function sendAiMessage(formData: FormData) {
 
     revalidatePath('/ai');
     revalidatePath(`/ai/${conversationId}`);
-
-    return {
-      success: true,
-      userMessage: {
-        id: userMessageId,
-        content: message,
-        role: 'user',
-        created_at: new Date(),
-      },
-      aiMessage: {
-        id: aiMessageId,
-        content: aiResponse.response,
-        role: 'assistant',
-        created_at: new Date(),
-        tokens_used: aiResponse.tokensUsed,
-      },
-    };
   } catch (error) {
     console.error('Error sending AI message:', error);
     throw new Error(error instanceof Error ? error.message : 'Failed to send message');

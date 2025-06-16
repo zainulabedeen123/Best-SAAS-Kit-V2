@@ -25,8 +25,8 @@ interface Conversation {
 interface ConversationSidebarProps {
   conversations: Conversation[];
   currentConversationId?: string;
-  onNewConversation: () => void;
-  onDeleteConversation: (id: string) => void;
+  onNewConversation: () => Promise<void> | void;
+  onDeleteConversation: (id: string) => Promise<void> | void;
   userStats: {
     dailyTokens: number;
     dailyLimit: number;

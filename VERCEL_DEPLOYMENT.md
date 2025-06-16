@@ -22,6 +22,11 @@ CLERK_SECRET_KEY=sk_test_COcbWNFYuKdYNcjTPVE31NJkSKKyoNpVPHOqAlnxyP
 
 # Neon Database
 DATABASE_URL=postgresql://neondb_owner:npg_cG1vUBx4Yhyk@ep-falling-mode-a4cpa67z-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require
+
+# OpenRouter AI
+OPENROUTER_API_KEY=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
+NEXT_PUBLIC_SITE_URL=https://your-app.vercel.app
+NEXT_PUBLIC_SITE_NAME=Your SaaS Platform
 ```
 
 ### 3. Environment Variable Configuration

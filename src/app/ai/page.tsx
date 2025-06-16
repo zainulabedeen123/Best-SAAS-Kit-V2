@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { createAiConversation, createNewConversation } from '@/lib/ai-actions';
 import { ConversationSidebar } from '@/components/chat/ConversationSidebar';
 import { ChatInput } from '@/components/chat/ChatInput';
+import Link from 'next/link';
 import AIService from '@/lib/ai-service';
 
 export default async function AiPage() {

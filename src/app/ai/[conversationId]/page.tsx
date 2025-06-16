@@ -81,7 +81,11 @@ export default async function ConversationPage({ params }: Props) {
                 .map((message, index) => (
                   <ChatMessage
                     key={message.id}
-                    message={message}
+                    message={{
+                      ...message,
+                      role: message.role as 'user' | 'assistant' | 'system',
+                      tokens_used: message.tokens_used || 0,
+                    }}
                     isLast={index === messages.filter(m => m.role !== 'system').length - 1}
                   />
                 ))
