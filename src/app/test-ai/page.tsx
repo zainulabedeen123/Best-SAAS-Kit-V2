@@ -13,8 +13,12 @@ export default async function TestAiPage() {
     console.log('User found:', user.id);
 
     // Test each function individually
-    let conversations, usageStats, usageLimits;
-    let conversationsError, usageStatsError, usageLimitsError;
+    let conversations: any = null;
+    let usageStats: any = null;
+    let usageLimits: any = null;
+    let conversationsError: any = null;
+    let usageStatsError: any = null;
+    let usageLimitsError: any = null;
 
     // Test conversations
     try {
