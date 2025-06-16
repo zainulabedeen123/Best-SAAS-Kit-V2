@@ -44,7 +44,9 @@ export async function createAiConversation(formData: FormData) {
     redirect(`/ai/${conversationId}`);
   } catch (error) {
     console.error('Error creating AI conversation:', error);
-    throw new Error('Failed to create conversation');
+    console.error('User ID:', user?.id);
+    console.error('Error details:', error instanceof Error ? error.message : 'Unknown error');
+    redirect('/ai?error=create_failed');
   }
 }
 
@@ -68,8 +70,10 @@ export async function createNewConversation() {
     revalidatePath('/ai');
     redirect(`/ai/${conversationId}`);
   } catch (error) {
-    console.error('Error creating AI conversation:', error);
-    throw new Error('Failed to create conversation');
+    console.error('Error creating new conversation:', error);
+    console.error('User ID:', user?.id);
+    console.error('Error details:', error instanceof Error ? error.message : 'Unknown error');
+    redirect('/ai?error=create_failed');
   }
 }
 

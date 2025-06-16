@@ -17,28 +17,46 @@ export async function getUserAiConversations(limit: number = 20) {
 // Get a specific conversation with messages
 export async function getAiConversation(conversationId: string) {
   const user = await currentUser();
-  if (!user) throw new Error('User not found');
-
-  const conversation = await db.query.AiConversations.findFirst({
-    where: and(
-      eq(AiConversations.id, conversationId),
-      eq(AiConversations.user_id, user.id)
-    ),
-  });
-
-  if (!conversation) {
-    throw new Error('Conversation not found');
+  if (!user) {
+    console.error('No user found in getAiConversation');
+    throw new Error('User not found');
   }
 
-  const messages = await db.query.AiMessages.findMany({
-    where: eq(AiMessages.conversation_id, conversationId),
-    orderBy: [AiMessages.created_at],
-  });
+  try {
+    console.log('Fetching conversation:', conversationId, 'for user:', user.id);
 
-  return {
-    conversation,
-    messages,
-  };
+    const conversation = await db.query.AiConversations.findFirst({
+      where: and(
+        eq(AiConversations.id, conversationId),
+        eq(AiConversations.user_id, user.id)
+      ),
+    });
+
+    if (!conversation) {
+      console.error('Conversation not found:', conversationId);
+      throw new Error('Conversation not found');
+    }
+
+    console.log('Found conversation:', conversation.title);
+
+    const messages = await db.query.AiMessages.findMany({
+      where: eq(AiMessages.conversation_id, conversationId),
+      orderBy: [AiMessages.created_at],
+    });
+
+    console.log('Found messages:', messages.length);
+
+    return {
+      conversation,
+      messages,
+    };
+  } catch (error) {
+    console.error('Error fetching conversation:', error);
+    console.error('Conversation ID:', conversationId);
+    console.error('User ID:', user.id);
+    console.error('Error details:', error instanceof Error ? error.message : 'Unknown error');
+    throw error;
+  }
 }
 
 // Get AI usage statistics
