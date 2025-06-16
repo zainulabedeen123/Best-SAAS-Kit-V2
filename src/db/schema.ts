@@ -47,3 +47,34 @@ export const UserActivityLog = pgTable('user_activity_log', {
   user_agent: text('user_agent'),
   created_at: timestamp('created_at').defaultNow().notNull(),
 });
+
+// AI chat conversations table
+export const AiConversations = pgTable('ai_conversations', {
+  id: text('id').primaryKey().notNull(),
+  user_id: text('user_id').notNull(),
+  title: text('title').notNull(),
+  model: text('model').notNull().default('deepseek/deepseek-r1-0528'),
+  created_at: timestamp('created_at').defaultNow().notNull(),
+  updated_at: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// AI chat messages table
+export const AiMessages = pgTable('ai_messages', {
+  id: text('id').primaryKey().notNull(),
+  conversation_id: text('conversation_id').notNull(),
+  role: text('role').notNull(), // 'user', 'assistant', 'system'
+  content: text('content').notNull(),
+  tokens_used: integer('tokens_used').default(0),
+  created_at: timestamp('created_at').defaultNow().notNull(),
+});
+
+// AI usage tracking table
+export const AiUsage = pgTable('ai_usage', {
+  id: text('id').primaryKey().notNull(),
+  user_id: text('user_id').notNull(),
+  model: text('model').notNull(),
+  tokens_used: integer('tokens_used').notNull(),
+  cost: text('cost'), // Store as string to avoid floating point issues
+  request_type: text('request_type').notNull(), // 'chat', 'completion', etc.
+  created_at: timestamp('created_at').defaultNow().notNull(),
+});

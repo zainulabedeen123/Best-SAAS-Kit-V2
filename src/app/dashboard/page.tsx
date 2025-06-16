@@ -1,6 +1,7 @@
 import { currentUser } from '@clerk/nextjs/server';
 import { getUserMessage, getUserProfileWithDefaults, getUserActivity, getDatabaseStats, testDatabaseConnection } from '@/lib/queries';
 import { createUserMessage, updateUserMessage, deleteUserMessage, createOrUpdateUserProfile } from '@/lib/actions';
+import { getAiUsageStats } from '@/lib/ai-queries';
 import Link from 'next/link';
 
 export default async function DashboardPage() {
@@ -21,12 +22,13 @@ export default async function DashboardPage() {
   await createOrUpdateUserProfile();
 
   // Fetch data
-  const [existingMessage, userProfile, recentActivity, dbStats, dbConnection] = await Promise.all([
+  const [existingMessage, userProfile, recentActivity, dbStats, dbConnection, aiStats] = await Promise.all([
     getUserMessage(),
     getUserProfileWithDefaults(),
     getUserActivity(5),
     getDatabaseStats(),
     testDatabaseConnection(),
+    getAiUsageStats(),
   ]);
 
   return (
@@ -67,23 +69,29 @@ export default async function DashboardPage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
+        <div className="grid md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
             <h3 className="text-lg font-semibold text-foreground mb-2">Messages</h3>
             <p className="text-3xl font-bold text-blue-600">{dbStats.messageCount}</p>
             <p className="text-sm text-foreground/70">Total messages saved</p>
           </div>
-          
+
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
             <h3 className="text-lg font-semibold text-foreground mb-2">Activity</h3>
             <p className="text-3xl font-bold text-green-600">{dbStats.activityCount}</p>
             <p className="text-sm text-foreground/70">Actions logged</p>
           </div>
-          
+
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-semibold text-foreground mb-2">Profile</h3>
-            <p className="text-3xl font-bold text-purple-600">✓</p>
-            <p className="text-sm text-foreground/70">Profile synced</p>
+            <h3 className="text-lg font-semibold text-foreground mb-2">AI Conversations</h3>
+            <p className="text-3xl font-bold text-purple-600">{aiStats.totalConversations}</p>
+            <p className="text-sm text-foreground/70">AI chats created</p>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-semibold text-foreground mb-2">AI Tokens</h3>
+            <p className="text-3xl font-bold text-orange-600">{aiStats.dailyTokens.toLocaleString()}</p>
+            <p className="text-sm text-foreground/70">Used today</p>
           </div>
         </div>
 
@@ -101,31 +109,32 @@ export default async function DashboardPage() {
                   </p>
                 </div>
                 
-                <form action={updateUserMessage} className="space-y-4">
-                  <input
-                    type="text"
-                    name="message"
-                    defaultValue={existingMessage.message}
-                    className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-foreground"
-                    placeholder="Update your message..."
-                  />
-                  <div className="flex gap-2">
+                <div className="space-y-4">
+                  <form action={updateUserMessage} className="space-y-4">
+                    <input
+                      type="text"
+                      name="message"
+                      defaultValue={existingMessage.message}
+                      className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-foreground"
+                      placeholder="Update your message..."
+                    />
                     <button
                       type="submit"
                       className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
                     >
                       Update Message
                     </button>
-                    <form action={deleteUserMessage} className="inline">
-                      <button
-                        type="submit"
-                        className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
-                      >
-                        Delete
-                      </button>
-                    </form>
-                  </div>
-                </form>
+                  </form>
+
+                  <form action={deleteUserMessage}>
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                    >
+                      Delete Message
+                    </button>
+                  </form>
+                </div>
               </div>
             ) : (
               <form action={createUserMessage} className="space-y-4">
@@ -179,7 +188,13 @@ export default async function DashboardPage() {
         </div>
 
         {/* Navigation Links */}
-        <div className="mt-8 flex gap-4 justify-center">
+        <div className="mt-8 flex gap-4 justify-center flex-wrap">
+          <Link
+            href="/ai"
+            className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors"
+          >
+            AI Assistant
+          </Link>
           <Link
             href="/profile"
             className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"

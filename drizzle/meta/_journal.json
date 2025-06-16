@@ -8,6 +8,13 @@
       "when": 1750103255055,
       "tag": "0000_giant_shatterstar",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1750106382049,
+      "tag": "0001_safe_alex_power",
+      "breakpoints": true
     }
   ]
 }

@@ -48,6 +48,9 @@ export default function RootLayout({
                     <Link href="/dashboard" className="text-foreground/70 hover:text-foreground transition-colors">
                       Dashboard
                     </Link>
+                    <Link href="/ai" className="text-foreground/70 hover:text-foreground transition-colors">
+                      AI Assistant
+                    </Link>
                   </SignedIn>
                   <Link href="/pricing" className="text-foreground/70 hover:text-foreground transition-colors">
                     Pricing
