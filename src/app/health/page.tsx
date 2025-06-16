@@ -1,5 +1,6 @@
 import { currentUser } from '@clerk/nextjs/server';
 import { db } from '@/db';
+import { sql } from 'drizzle-orm';
 import { logEnvironmentInfo } from '@/lib/env-check';
 
 export default async function HealthPage() {
@@ -15,7 +16,7 @@ export default async function HealthPage() {
     let dbStatus = 'Unknown';
     try {
       // Simple query to test database connection
-      const result = await db.execute('SELECT 1 as test');
+      const result = await db.execute(sql`SELECT 1 as test`);
       dbStatus = 'Connected';
       console.log('Database check: Success');
     } catch (dbError) {
