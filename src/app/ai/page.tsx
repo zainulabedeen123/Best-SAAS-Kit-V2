@@ -19,13 +19,20 @@ export default async function AiPage() {
     console.log('Loading AI page for user:', user.id);
     logEnvironmentInfo();
 
-    const [conversations, usageStats, usageLimits] = await Promise.all([
-      getUserAiConversations(20),
-      getAiUsageStats(),
-      checkAiUsageLimits('free'), // TODO: Get actual user plan
-    ]);
+    // Load data with individual error handling
+    console.log('Step 1: Loading conversations...');
+    const conversations = await getUserAiConversations(20);
+    console.log('✓ Conversations loaded:', conversations.length);
 
-    console.log('Loaded data - conversations:', conversations.length, 'usage:', usageStats);
+    console.log('Step 2: Loading usage stats...');
+    const usageStats = await getAiUsageStats();
+    console.log('✓ Usage stats loaded:', usageStats);
+
+    console.log('Step 3: Checking usage limits...');
+    const usageLimits = await checkAiUsageLimits('free');
+    console.log('✓ Usage limits loaded:', usageLimits);
+
+    console.log('All data loaded successfully');
 
     const systemPrompts = AIService.getSystemPrompts();
 
