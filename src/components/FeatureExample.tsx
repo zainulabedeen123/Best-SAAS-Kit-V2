@@ -4,11 +4,25 @@ import { useAuth } from '@clerk/nextjs'
 import { Protect } from '@clerk/nextjs'
 
 export function FeatureExample() {
-  const { has } = useAuth()
+  const { has, isLoaded } = useAuth()
 
-  // Check if user has specific features
-  const hasAdvancedAnalytics = has({ feature: 'advanced-analytics' })
-  const hasPrioritySupport = has({ feature: 'priority-support' })
+  // Don't render until auth is loaded
+  if (!isLoaded) {
+    return (
+      <div className="space-y-6">
+        <h3 className="text-lg font-semibold text-foreground">
+          Feature-Based Access Control Examples
+        </h3>
+        <div className="text-center py-8">
+          <p className="text-foreground/70">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Check if user has specific features (with null safety)
+  const hasAdvancedAnalytics = has ? has({ feature: 'advanced-analytics' }) : false
+  const hasPrioritySupport = has ? has({ feature: 'priority-support' }) : false
 
   return (
     <div className="space-y-6">
