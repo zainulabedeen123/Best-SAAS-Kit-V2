@@ -1,12 +1,9 @@
 import { currentUser } from '@clerk/nextjs/server';
-import { getUserAiConversations, getAiUsageStats, checkAiUsageLimits } from '@/lib/ai-queries';
+import { getAiData } from '@/lib/ai-queries';
 import { redirect } from 'next/navigation';
 import { createAiConversation, createNewConversation } from '@/lib/ai-actions';
-import { ConversationSidebar } from '@/components/chat/ConversationSidebar';
-import { ChatInput } from '@/components/chat/ChatInput';
 import { logEnvironmentInfo } from '@/lib/env-check';
 import Link from 'next/link';
-import AIService from '@/lib/ai-service';
 
 export default async function AiPage() {
   const user = await currentUser();
@@ -19,22 +16,11 @@ export default async function AiPage() {
     console.log('Loading AI page for user:', user.id);
     logEnvironmentInfo();
 
-    // Load data with individual error handling
-    console.log('Step 1: Loading conversations...');
-    const conversations = await getUserAiConversations(20);
-    console.log('✓ Conversations loaded:', conversations.length);
+    console.log('Loading AI data...');
+    const { conversations, usageStats, usageLimits, aiService } = await getAiData();
+    console.log('✓ All AI data loaded successfully');
 
-    console.log('Step 2: Loading usage stats...');
-    const usageStats = await getAiUsageStats();
-    console.log('✓ Usage stats loaded:', usageStats);
-
-    console.log('Step 3: Checking usage limits...');
-    const usageLimits = await checkAiUsageLimits('free');
-    console.log('✓ Usage limits loaded:', usageLimits);
-
-    console.log('All data loaded successfully');
-
-    const systemPrompts = AIService.getSystemPrompts();
+    const systemPrompts = aiService.getSystemPrompts();
 
     // If user has conversations, redirect to the most recent one
     if (conversations.length > 0) {
@@ -188,8 +174,11 @@ export default async function AiPage() {
     </div>
     );
   } catch (error) {
+    console.error('=== AI PAGE ERROR ===');
     console.error('Error loading AI page:', error);
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
     console.error('Error details:', error instanceof Error ? error.message : 'Unknown error');
+    console.error('User ID:', user?.id);
 
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
@@ -205,12 +194,25 @@ export default async function AiPage() {
           <p className="text-gray-600 dark:text-gray-400 mb-6">
             We're experiencing some technical difficulties. Please try again in a few moments.
           </p>
+          {process.env.NODE_ENV === 'development' && (
+            <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded text-left">
+              <p className="text-sm text-red-800 dark:text-red-200 font-mono">
+                {error instanceof Error ? error.message : 'Unknown error'}
+              </p>
+            </div>
+          )}
           <div className="space-y-3">
             <Link
               href="/dashboard"
               className="block w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
             >
               Go to Dashboard
+            </Link>
+            <Link
+              href="/test-ai"
+              className="block w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+            >
+              Test AI Functions
             </Link>
             <Link
               href="/ai"

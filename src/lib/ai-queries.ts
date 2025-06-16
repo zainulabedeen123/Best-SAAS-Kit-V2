@@ -1,6 +1,44 @@
 import { currentUser } from '@clerk/nextjs/server';
 import { db, AiConversations, AiMessages, AiUsage } from '@/db';
 import { eq, desc, and, gte, sql } from 'drizzle-orm';
+import AIService from './ai-service';
+
+// Main function to get all AI data for the page
+export async function getAiData() {
+  try {
+    console.log('=== getAiData called ===');
+
+    const user = await currentUser();
+    if (!user) {
+      console.log('No user found');
+      throw new Error('User not authenticated');
+    }
+
+    console.log('User found:', user.id);
+    console.log('AIService imported successfully');
+
+    const [conversations, usageStats, usageLimits] = await Promise.all([
+      getUserAiConversations(20),
+      getAiUsageStats(),
+      checkAiUsageLimits('free')
+    ]);
+
+    console.log('All AI data fetched successfully');
+    console.log('Conversations:', conversations?.length || 0);
+    console.log('Usage stats:', usageStats);
+    console.log('Usage limits:', usageLimits);
+
+    return {
+      conversations,
+      usageStats,
+      usageLimits,
+      aiService: AIService
+    };
+  } catch (error) {
+    console.error('Error in getAiData:', error);
+    throw error;
+  }
+}
 
 // Get user's AI conversations
 export async function getUserAiConversations(limit: number = 20) {
@@ -187,9 +225,8 @@ export async function checkAiUsageLimits(userPlan: string = 'free') {
     const stats = await getAiUsageStats();
     console.log('Got usage stats for limits check:', stats);
 
-    // Import limits from AI service
-    const AIServiceModule = await import('./ai-service');
-    const limits = AIServiceModule.default.getUsageLimits(userPlan);
+    // Get limits from AI service
+    const limits = AIService.getUsageLimits(userPlan);
     console.log('Plan limits:', limits);
 
     const canUseDaily = stats.dailyTokens < limits.dailyTokens;
